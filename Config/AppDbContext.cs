@@ -11,5 +11,15 @@ namespace ClinicaAPI.Config
             : base(options)
         { }
         public DbSet<Patient> Patients { get; set; }
+
+        // override onModel Creating for custom datatime in SQL
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Patient>()
+                .Property(p => p.FechaRegistro)
+                .HasDefaultValueSql("GETDATE()");
+        }
     }
 }

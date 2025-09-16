@@ -1,5 +1,7 @@
-//Reference to Config
+//Reference to Config, Repositories and Services
 using ClinicaAPI.Config;
+using ClinicaAPI.Repositories;
+using ClinicaAPI.Services;
 
 // Entity Framework Core
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +23,10 @@ builder.Services.AddSwaggerGen();
 // Configure conection to Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<PatientService>();
 
 var app = builder.Build();
 
