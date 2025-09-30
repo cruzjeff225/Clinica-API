@@ -22,7 +22,7 @@ namespace ClinicaAPI.Services
             var existingPatient = await _repository.GetByEmailAsync(patient.Email);
             if (existingPatient != null)
             {
-                throw new ArgumentException("El correo electrónico que deseas usar ya está en uso.");
+                throw new InvalidOperationException("El correo electrónico que deseas usar ya está en uso.");
             }
             return await _repository.AddAsync(patient);
         }

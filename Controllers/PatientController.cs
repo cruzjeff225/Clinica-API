@@ -1,4 +1,5 @@
 ﻿// References to Models, Services  and ASP.NET Core
+using ClinicaAPI.DTOs;
 using ClinicaAPI.Models;
 using ClinicaAPI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -27,26 +28,76 @@ namespace ClinicaAPI.Controllers
 
         // GET: api/patient/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<ActionResult<PatientReadDTO>> GetById(int id)
         {
             var patient = await _service.GetByIdAsync(id);
             if (patient == null)
             {
                 return NotFound();
             }
-            return Ok(patient);
+
+            // Map Patient to PatientReadDTO
+            var result = new PatientReadDTO
+            {
+                ID = patient.ID,
+                Nombre = patient.Nombre,
+                Apellido = patient.Apellido,
+                FechaNacimiento = patient.FechaNacimiento,
+                Genero = patient.Genero,
+                Telefono = patient.Telefono,
+                Email = patient.Email,
+                Direccion = patient.Direccion,
+                FechaRegistro = patient.FechaRegistro
+            };
+
+            return Ok(result);
         }
 
         // POST: api/patient
         [HttpPost]
-        public async Task<IActionResult> Create(Patient patient)
+        public async Task<ActionResult<PatientReadDTO>> Create(PatientCreateDTO dto)
         {
-            var newPatient = await _service.AddAsync(patient);
-            return CreatedAtAction(nameof(GetById), new { id = newPatient.ID }, newPatient);
+            try
+            {
+                var patient = new Patient
+                // Map DTO to Patient model
+                {
+                    Nombre = dto.Nombre,
+                    Apellido = dto.Apellido,
+                    FechaNacimiento = dto.FechaNacimiento,
+                    Genero = dto.Genero,
+                    Telefono = dto.Telefono,
+                    Email = dto.Email,
+                    Direccion = dto.Direccion,
+                    FechaRegistro = DateTime.Now
+                };
+
+                var createdPatient = await _service.AddAsync(patient);
+
+                // Map created Patient to PatientReadDTO
+                var result = new PatientReadDTO
+                {
+                    ID = createdPatient.ID,
+                    Nombre = createdPatient.Nombre,
+                    Apellido = createdPatient.Apellido,
+                    FechaNacimiento = createdPatient.FechaNacimiento,
+                    Genero = createdPatient.Genero,
+                    Telefono = createdPatient.Telefono,
+                    Email = createdPatient.Email,
+                    Direccion = createdPatient.Direccion,
+                    FechaRegistro = createdPatient.FechaRegistro
+                };
+
+                return CreatedAtAction(nameof(GetById), new { id = result.ID }, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // PUT: api/patient/{id}
-        [HttpPut("{id}")]
+            // PUT: api/patient/{id}
+            [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, Patient patient)
         {
             if (id != patient.ID)
